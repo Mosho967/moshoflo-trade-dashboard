@@ -1,16 +1,26 @@
 from decimal import Decimal
 from pydantic import BaseModel, Field
 from datetime import datetime
+from enum import Enum  
+
+# Enum for trade side (BUY or SELL)
+class SideEnum(str, Enum):
+    BUY = "BUY"
+    SELL = "SELL"  # 
 
 # Pydantic schemas for validating and serializing Trade data
 class TradeIn(BaseModel):
-    symbol: str = Field(..., min_length=1, max_length=10)  # Symbol must be 1–10 characters
-    price: Decimal = Field(..., gt=0)                      # Must be greater than 0
-    quantity: int = Field(..., gt=0)                       # Must be a positive integer
+    symbol: str = Field(..., max_length=15)
+    price: Decimal = Field(..., gt=0)
+    volume: Decimal = Field(..., gt=0)
+    side: SideEnum  
+    exchange: str = Field(..., max_length=50)
+    currency: str | None = Field(None, max_length=10)
 
 class TradeOut(TradeIn):
+    trade_id: str
     id: int
     timestamp: datetime
 
     class Config:
-        orm_mode = True  # Allows compatibility with SQLAlchemy models
+        from_attributes = True
