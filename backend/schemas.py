@@ -6,7 +6,7 @@ from enum import Enum
 # Enum for trade side (BUY or SELL)
 class SideEnum(str, Enum):
     BUY = "BUY"
-    SELL = "SELL"  # 
+    SELL = "SELL"  
 
 # Pydantic schemas for validating and serializing Trade data
 class TradeIn(BaseModel):
@@ -18,6 +18,7 @@ class TradeIn(BaseModel):
     currency: str | None = Field(None, max_length=10)
 
 class TradeOut(TradeIn):
+    risk_label: str | None = None
     trade_id: str
     id: int
     timestamp: datetime
