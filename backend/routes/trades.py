@@ -8,6 +8,8 @@ from backend.db import get_db
 from backend.models import Trade
 from backend.schemas import TradeIn, TradeOut
 from ai.predictor import classify_trade
+from backend.ws.connection_manager import active_connections
+import json
 
 
 
@@ -28,7 +30,7 @@ def get_all_trades(db: Session = Depends(get_db)):
 
 # POST a new trade
 @router.post("/", response_model=TradeOut)
-def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
+async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
     new_trade = Trade(
         trade_id=str(uuid4()),
         symbol=trade.symbol,
@@ -45,7 +47,16 @@ def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         db.refresh(new_trade)
         trade_out = TradeOut(**new_trade.__dict__)
         trade_out.risk_label = classify_trade(float(trade.volume))
+
+        # Broadcast to all active WebSocket connections
+        for conn in active_connections:
+            try:
+                await conn.send_text(json.dumps(trade_out.dict()))
+            except Exception as e:
+                print(f"WebSocket send failed: {e}")
+
         return trade_out
+
     except SQLAlchemyError as e:
         db.rollback()
         print("DB Error:", e)

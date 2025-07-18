@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Test</title>
+</head>
+<body>
+  <h1>WebSocket Connection Test</h1>
+  <pre id="log">Connecting...</pre>
+
+  <script>
+    const log = document.getElementById("log");
+    const socket = new WebSocket("ws://localhost:8000/ws/trades");
+
+    socket.onopen = () => {
+      log.innerText += "\n✅ Connected to WebSocket!";
+    };
+
+    socket.onmessage = (event) => {
+      log.innerText += `\n📥 Message: ${event.data}`;
+    };
+
+    socket.onerror = (error) => {
+      log.innerText += `\n❌ Error: ${error}`;
+    };
+
+    socket.onclose = () => {
+      log.innerText += "\n🔌 Connection closed.";
+    };
+  </script>
+</body>
+</html>
