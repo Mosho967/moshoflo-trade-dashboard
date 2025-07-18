@@ -1,9 +1,30 @@
+# Bytecode
 __pycache__/
 *.pyc
+
+# Virtual Envs
+venv/
 .env
 *.env
+
+# IDE settings
 .vscode/
 .idea/
+
+# Node
 node_modules/
+
+# Databases
 *.db
 
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs & Coverage
+*.log
+coverage/
+htmlcov/
+
+# FastAPI local cache
+__pypackages__/
