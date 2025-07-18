@@ -20,7 +20,11 @@ router = APIRouter(
 @router.get("/", response_model=list[TradeOut])
 def get_all_trades(db: Session = Depends(get_db)):
     trades = db.query(Trade).all()
-    return trades
+    return [
+        TradeOut(**t.__dict__, risk_label=classify_trade(float(t.volume)))
+        for t in trades
+    ]
+
 
 # POST a new trade
 @router.post("/", response_model=TradeOut)
