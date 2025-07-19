@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Numeric, DateTime, Integer
 from backend.db import Base
 from datetime import datetime
 
+
 class Trade(Base):
     __tablename__ = "trades"
 
@@ -12,5 +13,5 @@ class Trade(Base):
     volume = Column(Numeric(14, 4), nullable=False)
     side = Column(String(4), nullable=False)
     exchange = Column(String(50), nullable=False)
-    currency = Column(String(10)) 
-    timestamp = Column(DateTime, default=datetime.utcnow) 
+    currency = Column(String(10))
+    timestamp = Column(DateTime, default=datetime.utcnow)

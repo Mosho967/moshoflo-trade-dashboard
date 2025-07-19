@@ -4,11 +4,7 @@ import random
 
 # Connect to PostgreSQL
 conn = psycopg2.connect(
-    dbname="moshoflo",
-    user="admin",
-    password="pass",  
-    host="localhost",
-    port="5432"
+    dbname="moshoflo", user="admin", password="pass", host="localhost", port="5432"
 )
 cur = conn.cursor()
 
@@ -16,10 +12,10 @@ cur = conn.cursor()
 fake = Faker()
 
 # Sample data options
-symbols = ['AAPL', 'TSLA', 'GOOGL', 'AMZN', 'MSFT']
-exchanges = ['NYSE', 'NASDAQ', 'LSE']
-sides = ['BUY', 'SELL']
-currencies = ['USD', 'GBP', 'EUR']
+symbols = ["AAPL", "TSLA", "GOOGL", "AMZN", "MSFT"]
+exchanges = ["NYSE", "NASDAQ", "LSE"]
+sides = ["BUY", "SELL"]
+currencies = ["USD", "GBP", "EUR"]
 
 # Insert 50 fake trades
 for _ in range(50):
@@ -31,10 +27,13 @@ for _ in range(50):
     exchange = random.choice(exchanges)
     currency = random.choice(currencies)
 
-    cur.execute("""
+    cur.execute(
+        """
         INSERT INTO trades (trade_id, symbol, price, volume, side, exchange, currency)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (trade_id, symbol, price, volume, side, exchange, currency))
+    """,
+        (trade_id, symbol, price, volume, side, exchange, currency),
+    )
 
 conn.commit()
 cur.close()

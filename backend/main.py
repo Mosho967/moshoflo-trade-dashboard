@@ -21,6 +21,7 @@ app.include_router(trades_router)
 # Include the WebSocket routes
 app.include_router(ws_router)
 
+
 # Optional root route
 @app.get("/")
 def read_root():

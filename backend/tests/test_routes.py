@@ -3,10 +3,12 @@ from backend.main import app
 
 client = TestClient(app)
 
+
 def test_get_all_trades():
     response = client.get("/trades/")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+
 
 def test_create_trade():
     trade_data = {
@@ -15,7 +17,7 @@ def test_create_trade():
         "volume": 1000,
         "side": "BUY",
         "exchange": "NASDAQ",
-        "currency": "USD"
+        "currency": "USD",
     }
     response = client.post("/trades/", json=trade_data)
     assert response.status_code == 200

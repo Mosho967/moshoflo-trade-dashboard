@@ -12,11 +12,8 @@ from backend.ws.connection_manager import active_connections
 import json
 
 
+router = APIRouter(prefix="/trades", tags=["Trades"])
 
-router = APIRouter(
-    prefix="/trades",
-    tags=["Trades"]
-)
 
 # GET all trades
 @router.get("/", response_model=list[TradeOut])
@@ -39,7 +36,7 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         side=trade.side,
         exchange=trade.exchange,
         currency=trade.currency,
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )
     db.add(new_trade)
     try:
