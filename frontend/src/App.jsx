@@ -23,7 +23,7 @@ function App() {
       {trades.map((t) => (
         <tr key={t.id}>
           <td>{t.id}</td><td>{t.symbol}</td><td>{t.volume}</td>
-          <td>{t.side}</td><td>{t.risk}</td>
+          <td>{t.side}</td><td>{t.risk_label}</td>
           <td>{new Date(t.timestamp).toLocaleString()}</td>
         </tr>
       ))}
