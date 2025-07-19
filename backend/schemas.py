@@ -2,6 +2,8 @@ from decimal import Decimal
 from pydantic import BaseModel, Field
 from datetime import datetime
 from enum import Enum
+from typing import Optional
+
 
 
 # Enum for trade side (BUY or SELL)
@@ -21,10 +23,10 @@ class TradeIn(BaseModel):
 
 
 class TradeOut(TradeIn):
-    risk_label: str | None = None
-    trade_id: str
     id: int
-    timestamp: datetime
+    trade_id: str
+    timestamp: Optional[datetime]  # allow None
+    risk_label: Optional[str] = None
 
     class Config:
         from_attributes = True
