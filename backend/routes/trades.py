@@ -4,13 +4,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
 from datetime import datetime
 import json
+from decimal import Decimal
 
 from backend.db import get_db
 from backend.models import Trade
 from backend.schemas import TradeIn, TradeOut
 from ai.predictor import classify_trade
-from backend.ws.connection_manager import manager
-from backend.ws.live_feed import manager
+from backend.ws.connection_manager import manager  # Only import ONCE
 
 router = APIRouter(
     prefix="/trades",
@@ -39,15 +39,24 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         currency=trade.currency,
         timestamp=datetime.utcnow()
     )
+
     db.add(new_trade)
+
     try:
         db.commit()
         db.refresh(new_trade)
         trade_out = TradeOut(**new_trade.__dict__)
         trade_out.risk_label = classify_trade(float(trade.volume))
 
-        # Broadcast via the ConnectionManager
-        await manager.broadcast(json.dumps(trade_out.dict()))
+        # Convert Decimal and datetime to serializable format
+        def decimal_to_float(obj):
+            if isinstance(obj, Decimal):
+                return float(obj)
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            return str(obj)
+
+        await manager.broadcast(json.dumps(trade_out.dict(), default=decimal_to_float))
 
         return trade_out
 
@@ -55,4 +64,3 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         db.rollback()
         print("DB Error:", e)
         raise HTTPException(status_code=400, detail="Failed to create trade.")
-

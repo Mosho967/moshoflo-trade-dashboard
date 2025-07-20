@@ -15,8 +15,8 @@ class SideEnum(str, Enum):
 # Pydantic schemas for validating and serializing Trade data
 class TradeIn(BaseModel):
     symbol: str = Field(..., max_length=15)
-    price: Decimal = Field(..., gt=0)
-    volume: Decimal = Field(..., gt=0)
+    price: float = Field(..., gt=0)
+    volume: float = Field(..., gt=0)
     side: SideEnum
     exchange: str = Field(..., max_length=50)
     currency: str | None = Field(None, max_length=10)
