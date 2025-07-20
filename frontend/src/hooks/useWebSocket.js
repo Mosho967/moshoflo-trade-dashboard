@@ -10,7 +10,7 @@ export default function useWebSocket(onMessage) {
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      onMessage(data); // Callback to update your trade state
+      onMessage(data); // Callback to update trade state
     };
 
     socket.onerror = (error) => {

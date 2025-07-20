@@ -3,15 +3,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
 from datetime import datetime
+import json
 
 from backend.db import get_db
 from backend.models import Trade
 from backend.schemas import TradeIn, TradeOut
 from ai.predictor import classify_trade
-from backend.ws.connection_manager import active_connections
-import json
-
-
+from backend.ws.connection_manager import manager
+from backend.ws.live_feed import manager
 
 router = APIRouter(
     prefix="/trades",
@@ -26,7 +25,6 @@ def get_all_trades(db: Session = Depends(get_db)):
         TradeOut(**t.__dict__, risk_label=classify_trade(float(t.volume)))
         for t in trades
     ]
-
 
 # POST a new trade
 @router.post("/", response_model=TradeOut)
@@ -48,12 +46,8 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         trade_out = TradeOut(**new_trade.__dict__)
         trade_out.risk_label = classify_trade(float(trade.volume))
 
-        # Broadcast to all active WebSocket connections
-        for conn in active_connections:
-            try:
-                await conn.send_text(json.dumps(trade_out.dict()))
-            except Exception as e:
-                print(f"WebSocket send failed: {e}")
+        # Broadcast via the ConnectionManager
+        await manager.broadcast(json.dumps(trade_out.dict()))
 
         return trade_out
 
@@ -61,3 +55,4 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         db.rollback()
         print("DB Error:", e)
         raise HTTPException(status_code=400, detail="Failed to create trade.")
+
