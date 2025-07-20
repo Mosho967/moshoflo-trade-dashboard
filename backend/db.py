@@ -1,6 +1,16 @@
+from dotenv import load_dotenv
+load_dotenv()  # Load variables from .env file
+
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from backend.config import DATABASE_URL
+
+# Pull from env
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# ✅ Error check
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL not found")
 
 # Create DB engine
 engine = create_engine(DATABASE_URL)
@@ -11,10 +21,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Base class for models
 Base = declarative_base()
 
-
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
