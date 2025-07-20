@@ -1,14 +1,17 @@
-from dotenv import load_dotenv
-load_dotenv()  # Load variables from .env file
-
 import os
+
+# Load from .env only during local dev
+if os.getenv("GITHUB_ACTIONS") != "true":
+    from dotenv import load_dotenv
+    load_dotenv()
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Pull from env
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# ✅ Error check
+# Error check
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL not found")
 
@@ -27,4 +30,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
