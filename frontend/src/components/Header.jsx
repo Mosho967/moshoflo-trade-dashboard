@@ -7,7 +7,7 @@ function Header() {
       <img
         src="/images/moshoflo_logo.png"
         alt="Moshoflo Logo"
-        style={{ maxHeight: '80px' }}
+        style={{ maxHeight: '150px' }}
         className="mb-2"
       />
       <h2 className="mt-3">Trade Overview</h2>

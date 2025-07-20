@@ -1,6 +1,6 @@
 import React from 'react';
 
-function TradeTable({ trades }) {
+function TradeTable({ trades = [] }) {
   return (
     <div className="w-100" style={{ maxWidth: '1000px', margin: '0 auto' }}>
       <div className="card shadow-sm">
