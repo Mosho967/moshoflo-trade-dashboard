@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import TradeTable from "./components/TradeTable";
 import RiskSummary from "./components/RiskSummary";
 import Header from "./components/Header";
+import RiskPieChart from "./components/RiskPieChart";
 import "./App.css";
 
 const App = () => {
   const [trades, setTrades] = useState([]);
-  const [riskFilter, setRiskFilter] = useState(null); // filter state
+  const [riskFilter, setRiskFilter] = useState(null);
 
   useEffect(() => {
     const fetchTrades = async () => {
@@ -24,7 +25,6 @@ const App = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // filter
   const filteredTrades = riskFilter
     ? trades.filter((t) => t.risk_label === riskFilter)
     : trades;
@@ -33,20 +33,25 @@ const App = () => {
     <div className="app">
       <Header />
       <main className="main-container">
-  <div className="filter-topbar">
-    <RiskSummary
-      trades={trades}
-      riskFilter={riskFilter}
-      onFilterChange={setRiskFilter}
-    />
-  </div>
+        <div className="filter-topbar">
+      <RiskSummary
+    trades={trades}
+    riskFilter={riskFilter}
+    onFilterChange={setRiskFilter}
+  />
+           <RiskPieChart />
+          </div>
 
-  <div className="content-section">
-    <div className="table-section">
-      <TradeTable trades={filteredTrades} />
-    </div>
-  </div>
-</main>
+        <div className="content-section">
+          <div className="table-section">
+            <TradeTable trades={filteredTrades} />
+          </div>
+
+
+
+         
+        </div>
+      </main>
     </div>
   );
 };
