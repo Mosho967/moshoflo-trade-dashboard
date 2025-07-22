@@ -9,8 +9,8 @@ from decimal import Decimal
 from backend.db import get_db
 from backend.models import Trade
 from backend.schemas import TradeIn, TradeOut
-from ai.predictor import classify_trade
-from backend.ws.connection_manager import manager  # Only import ONCE
+from ai.predictor import predict_risk  # 🔁 now using ML model
+from backend.ws.connection_manager import manager  
 
 router = APIRouter(
     prefix="/trades",
@@ -22,7 +22,11 @@ router = APIRouter(
 def get_all_trades(db: Session = Depends(get_db)):
     trades = db.query(Trade).all()
     return [
-        TradeOut(**t.__dict__, risk_label=classify_trade(float(t.volume)))
+        TradeOut(**t.__dict__, risk_label=predict_risk({
+            "symbol": t.symbol,
+            "volume": float(t.volume),
+            "price": float(t.price)
+        }))
         for t in trades
     ]
 
@@ -45,10 +49,14 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
     try:
         db.commit()
         db.refresh(new_trade)
-        trade_out = TradeOut(**new_trade.__dict__)
-        trade_out.risk_label = classify_trade(float(trade.volume))
 
-        # Convert Decimal and datetime to serializable format
+        trade_out = TradeOut(**new_trade.__dict__)
+        trade_out.risk_label = predict_risk({
+            "symbol": trade.symbol,
+            "volume": float(trade.volume),
+            "price": float(trade.price)
+        })
+
         def decimal_to_float(obj):
             if isinstance(obj, Decimal):
                 return float(obj)

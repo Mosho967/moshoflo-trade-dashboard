@@ -1,12 +1,23 @@
-def classify_trade(volume: float) -> str:
+from joblib import load
+import os
 
-    # if volume is less than 1000, classify as low risk
-    if volume < 1000:
-        return "LOW RISK"
+# Load model and encoder
+model_path = os.path.join(os.path.dirname(__file__), "risk_model.joblib")
+encoder_path = os.path.join(os.path.dirname(__file__), "label_encoder.joblib")
 
-    # If volume is between 1000 and 10000, classify as medium risk
-    elif volume < 10000:
-        return "MEDIUM RISK"
-    # If volume is 10000 or more, classify as high risk
-    else:
-        return "HIGH RISK"
+model = load(model_path)
+label_encoder = load(encoder_path)
+
+def predict_risk(trade: dict) -> str:
+    """
+    Predicts the risk level of a trade using the trained model.
+    trade = {
+        "symbol": "AAPL",
+        "volume": 2000,
+        "price": 250.5
+    }
+    """
+    symbol_encoded = label_encoder.transform([trade["symbol"]])[0]
+    features = [[symbol_encoded, trade["volume"], trade["price"]]]
+    prediction = model.predict(features)
+    return prediction[0]
