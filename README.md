@@ -11,13 +11,13 @@ Visuals of the live dashboard in action:
 ### All Trades View
 ![All Trades](demo/demo-overview-1.png)
 
-### 🔴 High Risk Filter
+### 🟢 Low Risk Filter
 ![High Risk](demo/demo-overview-2.png)
 
 ### 🟠 Medium Risk Filter
 ![Medium Risk](demo/demo-overview-3.png)
 
-### 🟢 Low Risk Filter
+### 🔴 High Risk Filter
 ![Low Risk](demo/demo-overview-4.png)
 
 
