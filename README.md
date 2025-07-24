@@ -9,16 +9,17 @@
 Visuals of the live dashboard in action:
 
 ### All Trades View
-![All Trades](demo/demo-1.png)
+![All Trades](demo/demo-overview-1.png)
 
 ### 🔴 High Risk Filter
-![High Risk](demo/demo-2.png)
+![High Risk](demo/demo-overview-2.png)
 
 ### 🟠 Medium Risk Filter
-![Medium Risk](demo/demo-3.png)
+![Medium Risk](demo/demo-overview-3.png)
 
 ### 🟢 Low Risk Filter
-![Low Risk](demo/demo-4.png)
+![Low Risk](demo/demo-overview-4.png)
+
 
 ---
 
@@ -91,15 +92,19 @@ npm run dev
 
 ## Environment Configuration
 
-Create two `.env` files:
+Use the provided `.env.example` to configure your environment:
 
-**backend/.env**
+```bash
+cp .env.example backend/.env
+cp .env.example frontend/.env
 ```
+
+**.env.example**
+```
+# Backend
 DATABASE_URL=postgresql://admin:admin@localhost:5432/moshoflo
-```
 
-**frontend/.env**
-```
+# Frontend
 VITE_API_URL=http://localhost:8000
 VITE_WS_URL=ws://localhost:8000/ws/trades
 ```
@@ -135,13 +140,13 @@ ws://localhost:8000/ws/trades
 
 ---
 
-## Roadmap / TODO
+## 🚧 Planned Enhancements
 
-- [ ] Replace mock classifier with production-grade ML service  
-- [ ] Add Docker Compose for full local stack orchestration  
-- [ ] Add persistent database volume for local dev  
-- [ ] Improve frontend UI/UX (responsive design, real-time filters)  
-- [ ] Add live metrics (optional: Prometheus or frontend chart)
+- [ ] Integrate production-grade ML classification endpoint  
+- [ ] Add Docker Compose to orchestrate full stack locally  
+- [ ] Enable persistent PostgreSQL volumes in dev  
+- [ ] Polish dashboard UI/UX (live filters, responsive layout)  
+- [ ] Track trade analytics with metrics (Prometheus / custom)
 
 ---
 
