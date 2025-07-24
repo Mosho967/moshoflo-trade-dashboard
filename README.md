@@ -1,4 +1,4 @@
-# Moshoflo – Real-Time Trade Intelligence Dashboard
+# Moshoflo – Real-Time Trade Dashboard
 
 **Moshoflo** is a real-time financial trade monitoring and classification platform built with FastAPI, WebSockets, and React. It simulates the infrastructure required for streaming and visualizing financial trades in real time — complete with ML-driven risk scoring and live filtering.
 
