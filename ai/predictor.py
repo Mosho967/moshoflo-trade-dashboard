@@ -14,6 +14,7 @@ class RiskClassifierMLP(nn.Module):
             nn.Linear(32, 3)
         )
 
+
     def forward(self, x):
         return self.model(x)
 
