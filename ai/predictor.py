@@ -37,4 +37,7 @@ def predict_risk(trade: dict) -> str:
     with torch.no_grad():
         logits = model(input_tensor)
         predicted_class = torch.argmax(logits, dim=1).item()
-    # return ["LOW RISK", "MEDIUM RISK", "HIGH RISK"][predicted_class]
+        return ["LOW RISK", "MEDIUM RISK", "HIGH RISK"][predicted_class]
+    
+def classify_trade(trade: dict) -> str:
+    return predict_risk(trade)
