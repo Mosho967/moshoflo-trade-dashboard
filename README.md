@@ -26,7 +26,7 @@ Visuals of the live dashboard in action:
 ## 🔧 Features
 
 - **Real-Time Streaming** via WebSockets  
-- **ML-Powered Risk Classification** (using joblib model)  
+- **ML-Powered Risk Classification** (via PyTorch + joblib; inference only)  
 - **API-First Architecture** with FastAPI  
 - **Frontend Dashboard** built with React + Vite  
 - **Docker-Compatible Backend** (Dockerfile included)  
@@ -41,7 +41,7 @@ Visuals of the live dashboard in action:
 |------------|----------------------------------------|
 | Backend    | FastAPI, SQLAlchemy, PostgreSQL        |
 | Realtime   | WebSockets                             |
-| ML         | Python, scikit-learn, joblib           |
+| ML         | Python, PyTorch, scikit-learn, joblib  |
 | Frontend   | React, Vite                            |
 | DevOps     | Docker, GitHub Actions, Flake8, Pytest |
 
@@ -51,19 +51,19 @@ Visuals of the live dashboard in action:
 
 ```
 moshoflo/
-├── backend/                # FastAPI backend
-│   ├── main.py             # Entrypoint
-│   ├── db.py               # DB connection
-│   ├── models.py           # SQLAlchemy models
-│   ├── schemas.py          # Pydantic schemas
-│   ├── routes/             # API & WebSocket routes
+├── backend/
+│   ├── main.py              # FastAPI entrypoint
+│   ├── db.py                # DB setup
+│   ├── models.py            # SQLAlchemy models
+│   ├── schemas.py           # Pydantic schemas
+│   ├── routes/              # API & WebSocket routes
 │   └── Dockerfile
-├── ai/                     # ML logic
-│   ├── predictor.py
-│   ├── train_model.py
-│   └── *.joblib
-├── frontend/               # React + Vite UI
-└── .github/workflows/      # CI pipeline config
+├── ai/
+│   ├── predictor.py         # Inference logic
+│   ├── train_model.py       # Model training script
+│   └── *.pt, *.npy          # Generated model + encoder (created during training; not committed)
+├── frontend/                # React + Vite frontend
+└── .github/workflows/       # GitHub CI config
 ```
 
 ---
@@ -142,14 +142,18 @@ ws://localhost:8000/ws/trades
 
 ## 🚧 Planned Enhancements
 
-- [ ] Integrate production-grade ML classification endpoint  
-- [ ] Add Docker Compose to orchestrate full stack locally  
-- [ ] Enable persistent PostgreSQL volumes in dev  
-- [ ] Polish dashboard UI/UX (live filters, responsive layout)  
-- [ ] Track trade analytics with metrics (Prometheus / custom)
+- [ ] Replace dummy classifier with live ML service (e.g. FastAPI endpoint)  
+- [ ] Add Docker Compose support for full stack orchestration  
+- [ ] Improve frontend UI/UX for live trade tracking
+- [ ] Persist trades and classifications in database (currently in-memory)
+- [ ] Add unit tests for ML inference via `predictor.py`
+- [ ] Log model prediction confidence scores (for future calibration work)
+- [ ] Explore switching from joblib to TorchScript or ONNX for deployment
+- [ ] (Stretch) Add batch classification API route for bulk trade analysis
 
 ---
 
 ## 👤 Author
 
 **Mosorire Omisore** – 2025
+Built as an AI infrastructure prototype.
