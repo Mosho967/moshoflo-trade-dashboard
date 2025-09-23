@@ -1,12 +1,12 @@
 # Moshoflo – Real-Time Trade Dashboard
 
-**Moshoflo** is a real-time financial trade monitoring and classification platform built with FastAPI, WebSockets, and React. It simulates the infrastructure required for streaming and visualizing financial trades in real time — complete with ML-driven risk scoring and live filtering.
+Moshoflo is a dashboard built with FastAPI, WebSockets, and React. It demonstrates trade streaming, visualization, and simple risk scoring using a lightweight PyTorch model trained on synthetic data. The project showcases real-time API integration, WebSocket handling, and CI pipelines with GitHub Actions.
 
 ---
 
 ## Demo
 
-Visuals of the live dashboard in action:
+Visuals of the live dashboard:
 
 ### All Trades View
 ![All Trades](demo/demo-overview-1.png)
@@ -26,8 +26,8 @@ Visuals of the live dashboard in action:
 ## 🔧 Features
 
 - **Real-Time Streaming** via WebSockets  
-- **ML-Powered Risk Classification** (via PyTorch + joblib; inference only)  
-- **API-First Architecture** with FastAPI  
+- **ML-Powered Risk Classification** (PyTorch inference on synthetic data)  
+- **API Architecture** with FastAPI  
 - **Frontend Dashboard** built with React + Vite  
 - **Docker-Compatible Backend** (Dockerfile included)  
 - **CI Pipeline** with GitHub Actions  
@@ -41,7 +41,7 @@ Visuals of the live dashboard in action:
 |------------|----------------------------------------|
 | Backend    | FastAPI, SQLAlchemy, PostgreSQL        |
 | Realtime   | WebSockets                             |
-| ML         | Python, PyTorch, scikit-learn, joblib  |
+| ML         | Python, PyTorch(inference), scikit-learn, joblib  |
 | Frontend   | React, Vite                            |
 | DevOps     | Docker, GitHub Actions, Flake8, Pytest |
 
@@ -142,8 +142,8 @@ ws://localhost:8000/ws/trades
 
 ## 🚧 Planned Enhancements
 
-- [ ] Replace dummy classifier with live ML service (e.g. FastAPI endpoint)  
-- [ ] Add Docker Compose support for full stack orchestration  
+- [ ] Upgrade prototype classifier into a more robust ML service (e.g. TorchScript/ONNX)  
+- [ ] Add Docker Compose support for full stack
 - [ ] Improve frontend UI/UX for live trade tracking
 - [ ] Persist trades and classifications in database (currently in-memory)
 - [ ] Add unit tests for ML inference via `predictor.py`
