@@ -6,11 +6,11 @@ from datetime import datetime
 import json
 from decimal import Decimal
 
-from backend.db import get_db
-from backend.models import Trade
-from backend.schemas import TradeIn, TradeOut
-from ai.predictor import predict_risk  # 🔁 now using ML model
-from backend.ws.connection_manager import manager  
+from db import get_db
+from models import Trade
+from schemas import TradeIn, TradeOut
+from ai.predictor import predict_risk  
+from ws.connection_manager import manager  
 
 router = APIRouter(
     prefix="/trades",
