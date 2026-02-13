@@ -22,18 +22,14 @@ services:
       DATABASE_URL: postgresql://admin:admin@db:5432/moshoflo
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
-
+    
   frontend:
     build: ./frontend
     container_name: moshoflo-frontend
     depends_on:
       - backend
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-
+      - "3000:3000"
+      
 volumes:
   pgdata:

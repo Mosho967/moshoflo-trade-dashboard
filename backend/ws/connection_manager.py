@@ -1,5 +1,5 @@
-from fastapi import WebSocket
 from typing import List
+from fastapi import WebSocket
 
 class ConnectionManager:
     def __init__(self):
@@ -10,14 +10,17 @@ class ConnectionManager:
         self.active_connections.append(websocket)
 
     def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
 
     async def broadcast(self, message: str):
-        for connection in self.active_connections:
+        dead = []
+        for ws in list(self.active_connections):  
             try:
-                await connection.send_text(message)
-            except Exception as e:
-                print(f"Broadcast error: {e}")
+                await ws.send_text(message)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(ws)
 
 manager = ConnectionManager()
-

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional, Dict
 
 import numpy as np
 
@@ -36,12 +36,11 @@ else:
     RiskClassifierMLP = None
 
 # ---- Internal cached state ----
-_model = None
-_symbol_to_index = None
+_model: Optional[object] = None  # torch model or False 
+_symbol_to_index: Optional[Dict[str, int]] = None
 
 
-def _load_labels() -> dict:
-    """Loads symbol->index mapping (cached)."""
+def _load_labels() -> Dict[str, int]:
     global _symbol_to_index
     if _symbol_to_index is not None:
         return _symbol_to_index
@@ -56,9 +55,6 @@ def _load_labels() -> dict:
 
 
 def _heuristic_risk(symbol: str, volume: float, price: float) -> str:
-    """
-    Cheap fallback that keeps API alive when ML isn't available.
-    """
     if volume >= 8000 or price >= 1000:
         return "HIGH RISK"
     if volume >= 1000:
@@ -66,22 +62,32 @@ def _heuristic_risk(symbol: str, volume: float, price: float) -> str:
     return "LOW RISK"
 
 
-def _load_model():
-    """Loads torch model once (cached). Returns None if unavailable."""
+def _load_model() -> Optional[object]:
+    """
+    Loads torch model once (cached).
+    Returns:
+      - torch model object if available
+      - None if ML is not usable
+    """
     global _model
 
+    
+    if _model is False:
+        return None
+
     if not TORCH_AVAILABLE or RiskClassifierMLP is None:
+        _model = False
         return None
 
     if _model is not None:
-        return _model
+        return _model  # already loaded model
 
     if not MODEL_PATH.exists():
+        _model = False
         return None
 
     m = RiskClassifierMLP()
     try:
-        # torch>=2.0 supports weights_only 
         try:
             state = torch.load(MODEL_PATH, map_location="cpu", weights_only=True)
         except TypeError:
@@ -91,9 +97,8 @@ def _load_model():
         m.eval()
         _model = m
         return _model
-
     except Exception:
-        # Any load failure, no ML
+        _model = False
         return None
 
 
@@ -102,13 +107,11 @@ def predict_risk(trade: dict) -> Tuple[str, str]:
     Returns: (risk_label, risk_source)
     risk_source is "ml" or "heuristic"
     """
-    symbol_to_index = _load_labels()
-
     symbol = str(trade.get("symbol", "")).upper()
     volume = float(trade.get("volume", 0))
     price = float(trade.get("price", 0.0))
 
-    # No torch in env - heuristic
+    # If no torch available, no ML-related work
     if not TORCH_AVAILABLE:
         return _heuristic_risk(symbol, volume, price), "heuristic"
 
@@ -116,6 +119,7 @@ def predict_risk(trade: dict) -> Tuple[str, str]:
     if model is None:
         return _heuristic_risk(symbol, volume, price), "heuristic"
 
+    symbol_to_index = _load_labels()
     encoded_symbol = float(symbol_to_index.get(symbol, 0))
     x = torch.tensor([[encoded_symbol, volume, price]], dtype=torch.float32)
 
@@ -125,16 +129,10 @@ def predict_risk(trade: dict) -> Tuple[str, str]:
             pred = int(torch.argmax(logits, dim=1).item())
         return ["LOW RISK", "MEDIUM RISK", "HIGH RISK"][pred], "ml"
     except Exception:
-        # Any inference failure - heuristic
         return _heuristic_risk(symbol, volume, price), "heuristic"
 
 
 def classify_trade(trade: Union[int, float, dict]) -> str:
-    """
-    Backward-compatible facade for tests:
-    - number => threshold classification
-    - dict => predict_risk
-    """
     if isinstance(trade, (int, float)):
         volume = float(trade)
         if volume < 1000:
@@ -144,5 +142,5 @@ def classify_trade(trade: Union[int, float, dict]) -> str:
         else:
             return "HIGH RISK"
 
-    label, _source = predict_risk(trade)
+    label, _ = predict_risk(trade)
     return label

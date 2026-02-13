@@ -9,28 +9,28 @@ from decimal import Decimal
 from db import get_db
 from models import Trade
 from schemas import TradeIn, TradeOut
-from ai.predictor import predict_risk  
-from ws.connection_manager import manager  
+from ai.predictor import predict_risk
+from ws.connection_manager import manager
 
-router = APIRouter(
-    prefix="/trades",
-    tags=["Trades"]
-)
+router = APIRouter(prefix="/trades", tags=["Trades"])
 
-# GET all trades
+
 @router.get("/", response_model=list[TradeOut])
 def get_all_trades(db: Session = Depends(get_db)):
     trades = db.query(Trade).all()
-    return [
-        TradeOut(**t.__dict__, risk_label=predict_risk({
+
+    out: list[TradeOut] = []
+    for t in trades:
+        risk_label, _ = predict_risk({
             "symbol": t.symbol,
             "volume": float(t.volume),
-            "price": float(t.price)
-        }))
-        for t in trades
-    ]
+            "price": float(t.price),
+        })
+        out.append(TradeOut(**t.__dict__, risk_label=risk_label))
 
-# POST a new trade
+    return out
+
+
 @router.post("/", response_model=TradeOut)
 async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
     new_trade = Trade(
@@ -41,7 +41,7 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         side=trade.side,
         exchange=trade.exchange,
         currency=trade.currency,
-        timestamp=datetime.utcnow()
+        timestamp=datetime.utcnow(),
     )
 
     db.add(new_trade)
@@ -50,25 +50,27 @@ async def create_trade(trade: TradeIn, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_trade)
 
-        trade_out = TradeOut(**new_trade.__dict__)
-        trade_out.risk_label = predict_risk({
+        risk_label, _ = predict_risk({
             "symbol": trade.symbol,
             "volume": float(trade.volume),
-            "price": float(trade.price)
+            "price": float(trade.price),
         })
 
-        def decimal_to_float(obj):
+        trade_out = TradeOut(**new_trade.__dict__, risk_label=risk_label)
+
+        def json_default(obj):
             if isinstance(obj, Decimal):
                 return float(obj)
             if isinstance(obj, datetime):
                 return obj.isoformat()
             return str(obj)
 
-        await manager.broadcast(json.dumps(trade_out.dict(), default=decimal_to_float))
+        # Pydantic v2: model_dump() (avoid .dict() going forward)
+        await manager.broadcast(json.dumps(trade_out.model_dump(), default=json_default))
 
         return trade_out
 
     except SQLAlchemyError as e:
         db.rollback()
-        print("DB Error:", e)
+        print("DB Error:", repr(e))
         raise HTTPException(status_code=400, detail="Failed to create trade.")

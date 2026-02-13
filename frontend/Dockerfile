@@ -1,24 +1,15 @@
-# Use the official Node.js image
-FROM node:20
-
-# Set working directory
+# Build stage
+FROM node:20 AS build
 WORKDIR /app
-
-# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
-
-# Copy the rest of the frontend source code
+RUN npm ci
 COPY . .
-
-# Build the app for production
 RUN npm run build
 
-# Install `serve` to serve the production build
-RUN npm install -g serve
-
-# Command to serve the built app
-CMD ["serve", "-s", "dist"]
-
-# Expose the frontend port
+# Run stage
+FROM node:20-slim
+WORKDIR /app
+RUN npm i -g serve
+COPY --from=build /app/dist ./dist
 EXPOSE 3000
+CMD ["serve", "-s", "dist", "-l", "3000"]
