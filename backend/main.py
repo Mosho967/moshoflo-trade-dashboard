@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from routes.trades import router as trades_router
-from ws.live_feed import router as ws_router
+from backend.routes.trades import router as trades_router
+from backend.ws.live_feed import router as ws_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
