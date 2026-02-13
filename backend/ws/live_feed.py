@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import asyncio
-from ws.connection_manager import manager
+from backend.ws.connection_manager import manager
 
 router = APIRouter()
 
@@ -9,7 +9,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            # Send heartbeat every 25s to keep proxies from killing idle connections
+            # Sends heartbeat every 25s to keep proxies from killing idle connections
             await websocket.send_text('{"type":"heartbeat"}')
             await asyncio.sleep(25)
     except WebSocketDisconnect:

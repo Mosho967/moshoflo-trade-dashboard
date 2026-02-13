@@ -1,4 +1,4 @@
-from ai.predictor import classify_trade
+from backend.ai.predictor import classify_trade
 
 
 def test_low_volume_classification():
