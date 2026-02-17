@@ -14,7 +14,9 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: moshoflo-backend
     depends_on:
       - db
@@ -22,7 +24,7 @@ services:
       DATABASE_URL: postgresql://admin:admin@db:5432/moshoflo
     ports:
       - "8000:8000"
-    
+
   frontend:
     build: ./frontend
     container_name: moshoflo-frontend
@@ -30,6 +32,6 @@ services:
       - backend
     ports:
       - "3000:3000"
-      
+
 volumes:
   pgdata:
