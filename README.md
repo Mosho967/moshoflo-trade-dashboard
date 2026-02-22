@@ -1,88 +1,113 @@
-# Moshoflo – Real-Time Trade Dashboard
+# Moshoflo — Real-Time Trade Dashboard
 
-Moshoflo is a dashboard built with FastAPI, WebSockets, and React. It demonstrates trade streaming, visualization, and simple risk scoring using a lightweight PyTorch model trained on synthetic data. The project showcases real-time API integration, WebSocket handling, and CI pipelines with GitHub Actions.
+A real-time trade monitoring dashboard built with **FastAPI, PostgreSQL, WebSockets, and React**.
 
----
-
-## Demo
-
-Visuals of the live dashboard:
-
-### All Trades View
-![All Trades](demo/demo-overview-1.png)
-
-### 🟢 Low Risk Filter
-![High Risk](demo/demo-overview-2.png)
-
-### 🟠 Medium Risk Filter
-![Medium Risk](demo/demo-overview-3.png)
-
-### 🔴 High Risk Filter
-![Low Risk](demo/demo-overview-4.png)
-
+Trades are persisted in PostgreSQL and streamed to connected clients via WebSockets, separating initial state retrieval (REST) from incremental updates (push) to reduce latency and backend load.
 
 ---
 
-## 🔧 Features
+## Key Features
 
-- **Real-Time Streaming** via WebSockets  
-- **ML-Powered Risk Classification** (PyTorch inference on synthetic data)  
-- **API Architecture** with FastAPI  
-- **Frontend Dashboard** built with React + Vite  
-- **Docker-Compatible Backend** (Dockerfile included)  
-- **CI Pipeline** with GitHub Actions  
-- **Code Quality Tools** – Flake8 + Pytest  
+- **Real-time push updates** — new trades are broadcast to all connected clients via WebSockets
+- **Hybrid REST + WebSocket architecture** — initial state via REST, incremental updates via push
+- **PostgreSQL persistence** using SQLAlchemy models
+- **Dynamic risk classification** (ML inference with heuristic fallback)
+- **Docker Compose** for reproducible local environments
+- **CI via GitHub Actions** (linting + backend tests)
+- **Internal CLI** for database seeding and cleanup
+
+---
+
+## Architecture Overview
+
+### Frontend (React + Vite)
+
+- Fetches initial trade set from `GET /trades`
+- Opens persistent WebSocket connection to `/ws/trades`
+- Applies incremental updates in-memory using `trade_id` upsert logic
+- Computes UI summaries and charts client-side
+
+### Backend (FastAPI)
+
+- `POST /trades`
+  - Persists trade in PostgreSQL
+  - Computes risk classification
+  - Broadcasts the created trade event to all connected WebSocket clients
+
+- `GET /trades`
+  - Returns stored trades
+  - Includes computed `risk_label` field
+
+- Automatic table creation on startup (Docker-safe)
+
+### Database (PostgreSQL)
+
+- Stores trade records as the source of truth
+- `risk_label` is computed at request time (not persisted in current version)
 
 ---
 
 ## Tech Stack
 
-| Layer       | Tools                                |
-|------------|----------------------------------------|
-| Backend    | FastAPI, SQLAlchemy, PostgreSQL        |
-| Realtime   | WebSockets                             |
-| ML         | Python, PyTorch(inference), scikit-learn, joblib  |
-| Frontend   | React, Vite                            |
-| DevOps     | Docker, GitHub Actions, Flake8, Pytest |
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
 
----
+### Database
+- PostgreSQL
 
-## Project Structure
+### Realtime
+- Native WebSockets (FastAPI)
 
-```
-moshoflo/
-├── backend/
-│   ├── main.py              # FastAPI entrypoint
-│   ├── db.py                # DB setup
-│   ├── models.py            # SQLAlchemy models
-│   ├── schemas.py           # Pydantic schemas
-│   ├── routes/              # API & WebSocket routes
-│   └── Dockerfile
-├── ai/
-│   ├── predictor.py         # Inference logic
-│   ├── train_model.py       # Model training script
-│   └── *.pt, *.npy          # Generated model + encoder (created during training; not committed)
-├── frontend/                # React + Vite frontend
-└── .github/workflows/       # GitHub CI config
-```
+### Frontend
+- React (Vite)
+- Recharts (data visualization)
+
+### Tooling
+- Docker & Docker Compose
+- GitHub Actions (CI)
+- Internal CLI (database operations)
 
 ---
 
 ## Getting Started
 
-### Backend Setup
+### Run with Docker (Recommended)
 
+```bash
+docker compose up --build
 ```
+
+Services:
+
+- Frontend → http://localhost:3000
+- Backend → http://localhost:8000
+- WebSocket → ws://localhost:8000/ws/trades
+
+---
+
+### Run Locally (Without Docker)
+
+#### Backend
+
+```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate     # or .venv\Scripts\activate on Windows
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn main:app --reload
+uvicorn backend.main:app --reload --port 8000
 ```
 
-### Frontend Setup
+Set environment variable:
 
+```bash
+export DATABASE_URL="postgresql://admin:admin@localhost:5432/moshoflo"
 ```
+
+#### Frontend
+
+```bash
 cd frontend
 npm install
 npm run dev
@@ -90,70 +115,84 @@ npm run dev
 
 ---
 
-## Environment Configuration
-
-Use the provided `.env.example` to configure your environment:
-
-```bash
-cp .env.example backend/.env
-cp .env.example frontend/.env
-```
-
-**.env.example**
-```
-# Backend
-DATABASE_URL=postgresql://admin:admin@localhost:5432/moshoflo
-
-# Frontend
-VITE_API_URL=http://localhost:8000
-VITE_WS_URL=ws://localhost:8000/ws/trades
-```
-
----
-
 ## API Reference
 
-### REST Endpoints
+### `GET /trades`
 
-- `GET /trades/` – Retrieve all trades  
-- `POST /trades/` – Submit a new trade
+Returns stored trades with computed `risk_label`.
 
-**Sample POST Body**
-```
-{
-  "symbol": "TSLA",
-  "price": 300.5,
-  "volume": 150,
-  "side": "BUY",
-  "exchange": "NASDAQ",
-  "currency": "USD"
-}
-```
+### `POST /trades`
 
-### WebSocket Endpoint
+Creates a trade, persists it, and broadcasts it to connected WebSocket clients.
 
-```
-ws://localhost:8000/ws/trades
-```
+### `WS /ws/trades`
 
-- Sends JSON payloads in real-time on trade creation
+Streams trade events in JSON format after successful trade creation.
 
 ---
 
-## 🚧 Planned Enhancements
+## Risk Classification
 
-- [ ] Upgrade prototype classifier into a more robust ML service (e.g. TorchScript/ONNX)  
-- [ ] Add Docker Compose support for full stack
-- [ ] Improve frontend UI/UX for live trade tracking
-- [ ] Persist trades and classifications in database (currently in-memory)
-- [ ] Add unit tests for ML inference via `predictor.py`
-- [ ] Log model prediction confidence scores (for future calibration work)
-- [ ] Explore switching from joblib to TorchScript or ONNX for deployment
-- [ ] (Stretch) Add batch classification API route for bulk trade analysis
+Risk is determined using:
+
+- A lightweight ML inference module (when dependencies are available)
+- A deterministic heuristic fallback for environments without ML support
+
+The fallback mechanism ensures the system remains operational in environments where ML dependencies are unavailable (e.g., CI pipelines).
 
 ---
 
-## 👤 Author
+## CLI (Database Operations)
 
-**Mosorire Omisore** – 2025
-Built as an AI infrastructure prototype.
+Run inside Docker container:
+
+Clear all trades:
+
+```bash
+docker compose exec backend python -m backend.cli clear
+```
+
+Seed trades:
+
+```bash
+docker compose exec backend python -m backend.cli seed --n 50
+```
+
+---
+
+## Tests
+
+Run backend tests:
+
+```bash
+cd backend
+pytest
+```
+
+---
+
+## Known Limitations
+
+- CORS is permissive (development scope)
+- No authentication or rate limiting (demo scope)
+- Risk is computed dynamically and not persisted
+- No pagination on trade queries (current version)
+
+---
+
+## Design Decisions
+
+- WebSockets were chosen over polling to reduce latency and unnecessary API traffic.
+- Risk classification is computed dynamically to decouple inference logic from persistence and allow rapid iteration before introducing migrations.
+- Docker Compose is used to ensure reproducible local environments.
+
+---
+
+## Roadmap
+
+- Introduce pagination & ordering for large trade sets
+- Introduce database migrations (Alembic)
+- Persist risk metadata (`risk_tier`, `risk_score`, `source`) using migrations
+- Add ingestion simulation service for live trade generation
+- Improve WebSocket reconnection handling
+- Add structured logging and health checks
