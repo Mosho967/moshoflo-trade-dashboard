@@ -1,55 +1,75 @@
 const RiskSummary = ({ trades = [], riskFilter, onFilterChange }) => {
-  const toggleFilter = (label) => {
-    onFilterChange(riskFilter === label ? null : label); // toggle
-  };
+  const toggle = (label) => onFilterChange(riskFilter === label ? null : label);
 
   const total = trades.length;
-  const count = (level) => trades.filter(t => t.risk_label === level).length;
+  const highCount = trades.filter((t) => t.risk_label === "HIGH RISK").length;
+  const medCount = trades.filter((t) => t.risk_label === "MEDIUM RISK").length;
+  const lowCount = trades.filter((t) => t.risk_label === "LOW RISK").length;
 
-  const averagePrice = trades.length
+  const avgPrice = trades.length
     ? (
         trades
-          .map(t => parseFloat(t.price))
-          .filter(p => !isNaN(p))
+          .map((t) => parseFloat(t.price))
+          .filter((p) => !isNaN(p))
           .reduce((a, b) => a + b, 0) / trades.length
       ).toFixed(2)
     : "0.00";
 
   return (
-    <div>
-      <h3>Trade Summary</h3>
-
-      <div className="chip-group">
-        <span
-          className={`chip ${!riskFilter ? "active" : ""}`}
-          onClick={() => toggleFilter(null)}
-        >
-          All
-        </span>
-        <span
-          className={`chip ${riskFilter === "HIGH RISK" ? "active" : ""}`}
-          onClick={() => toggleFilter("HIGH RISK")}
-        >
-          🔴 High-Risk ({count("HIGH RISK")})
-        </span>
-        <span
-          className={`chip ${riskFilter === "MEDIUM RISK" ? "active" : ""}`}
-          onClick={() => toggleFilter("MEDIUM RISK")}
-        >
-          🟠 Medium-Risk ({count("MEDIUM RISK")})
-        </span>
-        <span
-          className={`chip ${riskFilter === "LOW RISK" ? "active" : ""}`}
-          onClick={() => toggleFilter("LOW RISK")}
-        >
-          🟢 Low-Risk ({count("LOW RISK")})
-        </span>
+    <div className="kpi-row">
+      <div
+        className={`kpi-card ${!riskFilter ? "active" : ""}`}
+        onClick={() => toggle(null)}
+      >
+        <div className="kpi-label">Total Trades</div>
+        <div className="kpi-value">{total}</div>
       </div>
 
-      <p style={{ marginTop: "12px" }}>
-        <strong>Total Trades:</strong> {total}<br />
-        <strong>Average Price:</strong> ${averagePrice}
-      </p>
+      <div
+        className={`kpi-card ${riskFilter === "HIGH RISK" ? "active-high" : ""}`}
+        onClick={() => toggle("HIGH RISK")}
+      >
+        <div className="kpi-label">
+          <span className="kpi-dot" style={{ background: "var(--risk-high)" }} />
+          High Risk
+        </div>
+        <div className="kpi-value" style={{ color: "var(--risk-high)" }}>
+          {highCount}
+        </div>
+      </div>
+
+      <div
+        className={`kpi-card ${riskFilter === "MEDIUM RISK" ? "active-medium" : ""}`}
+        onClick={() => toggle("MEDIUM RISK")}
+      >
+        <div className="kpi-label">
+          <span className="kpi-dot" style={{ background: "var(--risk-medium)" }} />
+          Medium Risk
+        </div>
+        <div className="kpi-value" style={{ color: "var(--risk-medium)" }}>
+          {medCount}
+        </div>
+      </div>
+
+      <div
+        className={`kpi-card ${riskFilter === "LOW RISK" ? "active-low" : ""}`}
+        onClick={() => toggle("LOW RISK")}
+      >
+        <div className="kpi-label">
+          <span className="kpi-dot" style={{ background: "var(--risk-low)" }} />
+          Low Risk
+        </div>
+        <div className="kpi-value" style={{ color: "var(--risk-low)" }}>
+          {lowCount}
+        </div>
+      </div>
+
+      <div className="kpi-card" style={{ cursor: "default" }}>
+        <div className="kpi-label">Avg Price</div>
+        <div className="kpi-value" style={{ fontSize: "22px", color: "var(--accent)" }}>
+          ${avgPrice}
+        </div>
+      </div>
     </div>
   );
 };

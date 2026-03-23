@@ -1,17 +1,17 @@
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-
 function Header() {
   return (
-    <div className="text-center my-4">
-      <img
-        src="/images/moshoflo_logo.png"
-        alt="Moshoflo Logo"
-        style={{ maxHeight: '150px' }}
-        className="mb-2"
-      />
-      <h2 className="mt-3">Trade Overview</h2>
-    </div>
+    <header className="app-header">
+      <div className="header-inner">
+        <span className="header-wordmark">MOSHOFLO</span>
+        <div className="header-right">
+          <span className="header-title">Trade Dashboard</span>
+          <div className="live-badge">
+            <span className="live-dot" />
+            LIVE
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }
 

@@ -40,10 +40,8 @@ const App = () => {
       }
     };
 
-    // initial load
     fetchTrades();
 
-    // live updates
     ws = new WebSocket(WS_URL);
 
     ws.onmessage = (event) => {
@@ -73,18 +71,17 @@ const App = () => {
     <div className="app">
       <Header />
       <main className="main-container">
-        <div className="filter-topbar">
-          <RiskSummary
-            trades={trades}
-            riskFilter={riskFilter}
-            onFilterChange={setRiskFilter}
-          />
-          <RiskPieChart trades={filteredTrades} />
-        </div>
-
-        <div className="content-section">
+        <RiskSummary
+          trades={trades}
+          riskFilter={riskFilter}
+          onFilterChange={setRiskFilter}
+        />
+        <div className="content-row">
           <div className="table-section">
             <TradeTable trades={filteredTrades} />
+          </div>
+          <div className="chart-section">
+            <RiskPieChart trades={filteredTrades} />
           </div>
         </div>
       </main>

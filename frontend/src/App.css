@@ -1,79 +1,354 @@
-/* src/App.css */
-
+/* ─── App Shell ───────────────────────────────────────────── */
 .app {
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
   min-height: 100vh;
-  padding: 20px;
+  background-color: var(--bg-base);
+  background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 194, 255, 0.05) 0%, transparent 65%);
 }
 
+/* ─── Header ──────────────────────────────────────────────── */
+.app-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 28px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-wordmark {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-primary);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: var(--risk-low-bg);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--risk-low);
+  user-select: none;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--risk-low);
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+/* ─── Main Layout ─────────────────────────────────────────── */
 .main-container {
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  margin-top: 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 28px 48px;
 }
 
-.table-section {
-  flex: 2;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
+/* ─── KPI Stats Bar ───────────────────────────────────────── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-.summary-section {
-  flex: 1;
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  min-width: 250px;
-  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-.risk-option {
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 4px;
-  border-radius: 4px;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.15s ease;
+  user-select: none;
 }
 
-.risk-option:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  transform: scale(1.02);
+.kpi-card:hover {
+  border-color: rgba(0, 194, 255, 0.35);
+  background: var(--bg-card-alt);
+  transform: translateY(-1px);
 }
 
-.chip-group {
+.kpi-card.active {
+  border-color: var(--border-accent);
+  background: var(--accent-glow);
+}
+
+.kpi-card.active-high {
+  border-color: rgba(244, 63, 94, 0.4);
+  background: var(--risk-high-bg);
+}
+
+.kpi-card.active-medium {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: var(--risk-medium-bg);
+}
+
+.kpi-card.active-low {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: var(--risk-low-bg);
+}
+
+.kpi-label {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
   margin-bottom: 10px;
 }
 
-.chip {
-  background-color: #e0e0e0;
-  padding: 6px 12px;
+.kpi-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.kpi-value {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Content Row ─────────────────────────────────────────── */
+.content-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.table-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.chart-section {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+/* ─── Trade Table Card ────────────────────────────────────── */
+.trade-table-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.trade-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.trade-table-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.trade-count-badge {
+  background: var(--bg-card-alt);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  font-size: 0.9rem;
+  padding: 2px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-.chip:hover {
-  background-color: #d5d5d5;
-  transform: scale(1.03);
+.table-scroll {
+  overflow-x: auto;
 }
 
-.chip.active {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
+table.trades {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.filter-topbar {
-  margin-bottom: 20px;
-  background-color: white;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+table.trades th {
+  padding: 10px 18px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  background: var(--bg-card);
+}
+
+table.trades td {
+  padding: 11px 18px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+table.trades tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table.trades tbody tr {
+  transition: background 0.1s ease;
+}
+
+table.trades tbody tr:hover td {
+  background: var(--bg-card-alt);
+}
+
+.cell-id {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.cell-symbol {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cell-price {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--accent);
+}
+
+.cell-volume {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--text-secondary);
+}
+
+.cell-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.side-buy {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--risk-low);
+  background: var(--risk-low-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.side-sell {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--risk-high);
+  background: var(--risk-high-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.risk-badge.high {
+  color: var(--risk-high);
+  background: var(--risk-high-bg);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.risk-badge.medium {
+  color: var(--risk-medium);
+  background: var(--risk-medium-bg);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.risk-badge.low {
+  color: var(--risk-low);
+  background: var(--risk-low-bg);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.risk-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ─── Chart Card ──────────────────────────────────────────── */
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 16px;
+}
+
+.chart-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  padding: 0 4px;
+}
+
+/* ─── Empty State ─────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 13px;
 }
