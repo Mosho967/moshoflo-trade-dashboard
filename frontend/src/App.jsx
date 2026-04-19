@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import TradeTable from "./components/TradeTable";
 import RiskSummary from "./components/RiskSummary";
 import Header from "./components/Header";
@@ -25,23 +25,23 @@ const App = () => {
   const [trades, setTrades] = useState([]);
   const [riskFilter, setRiskFilter] = useState(null);
   const [wsStatus, setWsStatus] = useState("connecting");
+  const [backendRestored, setBackendRestored] = useState(false);
+
+  const fetchTrades = useCallback(async () => {
+    try {
+      const r = await fetch(`${API_BASE}/trades/`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      setTrades(data);
+    } catch (err) {
+      console.error("Failed to load trades:", err);
+    }
+  }, []);
 
   useEffect(() => {
     let ws;
     let cancelled = false;
-
-    const fetchTrades = async () => {
-      try {
-        const r = await fetch(`${API_BASE}/trades/`);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const data = await r.json();
-        if (!cancelled) setTrades(data);
-      } catch (err) {
-        console.error("Failed to load trades:", err);
-      }
-    };
-
-    fetchTrades();
+    let retryTimer;
 
     const connect = () => {
       if (cancelled) return;
@@ -49,8 +49,9 @@ const App = () => {
       ws = new WebSocket(WS_URL);
 
       ws.onopen = () => {
-        console.log("WS connected");
+        if (cancelled) return;
         setWsStatus("live");
+        setBackendRestored(false);
       };
 
       ws.onmessage = (event) => {
@@ -63,21 +64,37 @@ const App = () => {
         }
       };
 
-      ws.onerror = (e) => { console.error("WS error", e); setWsStatus("offline"); };
+      ws.onerror = (e) => { console.error("WS error", e); };
+
       ws.onclose = () => {
-        console.log("WS closed");
+        if (cancelled) return;
         setWsStatus("offline");
-        setTimeout(connect, 3000);
+        const probe = () => {
+          if (cancelled) return;
+          const p = new WebSocket(WS_URL);
+          p.onopen = () => { p.close(); setBackendRestored(true); };
+          p.onerror = () => { retryTimer = setTimeout(probe, 3000); };
+        };
+        retryTimer = setTimeout(probe, 3000);
       };
     };
 
+    fetchTrades();
     connect();
 
     return () => {
       cancelled = true;
+      clearTimeout(retryTimer);
       ws?.close();
     };
-  }, []);
+  }, [fetchTrades]);
+
+  const handleReconnect = async () => {
+    setBackendRestored(false);
+    setWsStatus("connecting");
+    await fetchTrades();
+    window.location.reload();
+  };
 
   const filteredTrades = useMemo(() => {
     return riskFilter ? trades.filter((t) => t.risk_label === riskFilter) : trades;
@@ -86,7 +103,32 @@ const App = () => {
   return (
     <div className="app">
       <Header wsStatus={wsStatus} />
-      <main className="main-container">
+
+      {(wsStatus === "offline" || backendRestored) && (
+        <div className={`connection-overlay ${backendRestored ? "connection-overlay--restored" : ""}`}>
+          <div className="connection-overlay__box">
+            {backendRestored ? (
+              <>
+                <div className="connection-overlay__icon connection-overlay__icon--green" />
+                <p className="connection-overlay__title">Connection Regained</p>
+                <p className="connection-overlay__sub">The service is back online.</p>
+                <button className="connection-overlay__btn" onClick={handleReconnect}>
+                  Reconnect
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="connection-overlay__icon connection-overlay__icon--red" />
+                <p className="connection-overlay__title">Service Unavailable</p>
+                <p className="connection-overlay__sub">Waiting for connection...</p>
+                <div className="connection-overlay__spinner" />
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <main className={`main-container ${wsStatus === "offline" ? "main-container--blurred" : ""}`}>
         <RiskSummary
           trades={trades}
           riskFilter={riskFilter}

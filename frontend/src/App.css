@@ -1,3 +1,92 @@
+/* ─── Connection Overlay ──────────────────────────────────── */
+.connection-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 18, 0.75);
+  backdrop-filter: blur(8px);
+  animation: overlayFadeIn 0.4s ease;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.connection-overlay__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 48px;
+  text-align: center;
+}
+
+.connection-overlay__icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-bottom: 4px;
+}
+.connection-overlay__icon--red  { background: var(--risk-high); box-shadow: 0 0 12px var(--risk-high); }
+.connection-overlay__icon--green { background: var(--risk-low);  box-shadow: 0 0 12px var(--risk-low);  }
+
+.connection-overlay__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.connection-overlay__sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.connection-overlay__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-top: 4px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.connection-overlay__btn {
+  margin-top: 8px;
+  padding: 8px 24px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.connection-overlay__btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.main-container--blurred {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ─── App Shell ───────────────────────────────────────────── */
 .app {
   min-height: 100vh;
