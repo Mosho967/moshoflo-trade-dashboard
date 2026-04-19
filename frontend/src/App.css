@@ -51,14 +51,34 @@
   gap: 6px;
   padding: 4px 12px;
   border-radius: 20px;
-  background: var(--risk-low-bg);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid transparent;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: var(--risk-low);
   user-select: none;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
+
+.live-badge--live {
+  background: var(--risk-low-bg);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: var(--risk-low);
+}
+.live-badge--live .live-dot { background: var(--risk-low); }
+
+.live-badge--connecting {
+  background: rgba(250, 173, 20, 0.12);
+  border-color: rgba(250, 173, 20, 0.25);
+  color: #faad14;
+}
+.live-badge--connecting .live-dot { background: #faad14; }
+
+.live-badge--offline {
+  background: rgba(255, 77, 79, 0.12);
+  border-color: rgba(255, 77, 79, 0.25);
+  color: var(--risk-high);
+}
+.live-badge--offline .live-dot { background: var(--risk-high); animation: none; }
 
 .live-dot {
   width: 6px;

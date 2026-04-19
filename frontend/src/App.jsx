@@ -24,6 +24,7 @@ const upsertTrade = (prev, incoming) => {
 const App = () => {
   const [trades, setTrades] = useState([]);
   const [riskFilter, setRiskFilter] = useState(null);
+  const [wsStatus, setWsStatus] = useState("connecting");
 
   useEffect(() => {
     let ws;
@@ -42,20 +43,35 @@ const App = () => {
 
     fetchTrades();
 
-    ws = new WebSocket(WS_URL);
+    const connect = () => {
+      if (cancelled) return;
+      setWsStatus("connecting");
+      ws = new WebSocket(WS_URL);
 
-    ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        if (msg?.type === "heartbeat") return;
-        setTrades((prev) => upsertTrade(prev, msg));
-      } catch (e) {
-        console.error("Bad WS message:", e);
-      }
+      ws.onopen = () => {
+        console.log("WS connected");
+        setWsStatus("live");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg?.type === "heartbeat") return;
+          setTrades((prev) => upsertTrade(prev, msg));
+        } catch (e) {
+          console.error("Bad WS message:", e);
+        }
+      };
+
+      ws.onerror = (e) => { console.error("WS error", e); setWsStatus("offline"); };
+      ws.onclose = () => {
+        console.log("WS closed");
+        setWsStatus("offline");
+        setTimeout(connect, 3000);
+      };
     };
 
-    ws.onerror = (e) => console.error("WS error", e);
-    ws.onclose = () => console.log("WS closed");
+    connect();
 
     return () => {
       cancelled = true;
@@ -69,7 +85,7 @@ const App = () => {
 
   return (
     <div className="app">
-      <Header />
+      <Header wsStatus={wsStatus} />
       <main className="main-container">
         <RiskSummary
           trades={trades}
