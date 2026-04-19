@@ -4,7 +4,19 @@ A real-time trade monitoring dashboard built with **FastAPI, PostgreSQL, WebSock
 
 Trades are persisted in PostgreSQL and streamed to connected clients via WebSockets, separating initial state retrieval (REST) from incremental updates (push) to reduce latency and backend load.
 
-![Dashboard](demo/Dashboard.png)
+<div align="center">
+  <img src="demo/Dashboard.png" width="800"/><br/>
+  <b>Live Dashboard</b>
+</div>
+
+<br/>
+
+<table>
+  <tr>
+    <td align="center"><img src="demo/Service_Unavailable.png" width="380"/><br/><b>Service Unavailable</b></td>
+    <td align="center"><img src="demo/Connection_Regrained.png" width="380"/><br/><b>Connection Regained</b></td>
+  </tr>
+</table>
 
 ---
 
